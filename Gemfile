@@ -3,7 +3,7 @@ source 'http://rubygems.org'
 gem 'rails', '3.0.12'
 gem 'gravatar_image_tag', '1.0.0.pre2'
 gem 'will_paginate', '3.0.pre2'
-gem 'sqlite3', '1.3.4'
+gem 'mysql', "2.8.1" # Amazon RDS only seems to work with 2.8.1
 
 group :development do
   gem 'rspec-rails', '2.6.1'
