@@ -1,35 +1,35 @@
-# Use imagem oficial do Ruby
-FROM ruby:3.2-alpine
+# Usa Ruby 2.6, mais próximo das versões suportadas pelo Rails 3
+FROM ruby:2.6-alpine
 
-# Instalar dependências de sistema
+# Instala dependências do sistema
 RUN apk add --no-cache \
-    build-base \
-    postgresql-dev \
-    nodejs \
-    yarn \
-    tzdata \
-    git
+  build-base \
+  postgresql-dev \
+  nodejs \
+  yarn \
+  tzdata \
+  git
 
-# Diretório de trabalho
+# Corrige Bundler incompatível com Rails 3
+RUN gem uninstall -aIx bundler && \
+    gem install bundler -v 1.17.3
+
 WORKDIR /app
 
-# Copiar Gemfile e instalar gems
+# Copia e instala gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --jobs 4 --retry 3
+RUN bundle _1.17.3_ install --jobs 4 --retry 3
 
-# Copiar o restante do app
+# Copia o restante do código
 COPY . .
-
-# Pré-compilar assets se usar Rails com assets pipeline
-RUN RAILS_ENV=production bundle exec rake assets:precompile
 
 # Variáveis de ambiente
 ENV RAILS_ENV=production \
     RACK_ENV=production \
     PORT=3000
 
-# Expor porta
+# Exposição da porta
 EXPOSE 3000
 
-# Comando para iniciar a aplicação
+# Comando de inicialização
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
