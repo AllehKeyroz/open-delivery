@@ -1,4 +1,3 @@
-# Usa Ruby 2.6, mais próximo das versões suportadas pelo Rails 3
 FROM ruby:2.6-alpine
 
 # Instala dependências do sistema
@@ -10,26 +9,24 @@ RUN apk add --no-cache \
   tzdata \
   git
 
-# Corrige Bundler incompatível com Rails 3
+# Atualiza o Bundler para a versão usada no projeto
 RUN gem uninstall -aIx bundler && \
     gem install bundler -v 1.17.3
 
 WORKDIR /app
 
-# Copia e instala gems
+# Copia o Gemfile primeiro para otimizar o cache
 COPY Gemfile Gemfile.lock ./
-RUN bundle _1.17.3_ install --jobs 4 --retry 3
+
+# Corrige conflito de rake antes de instalar
+RUN bundle _1.17.3_ update rake && \
+    bundle _1.17.3_ install --jobs 4 --retry 3
 
 # Copia o restante do código
 COPY . .
 
-# Variáveis de ambiente
-ENV RAILS_ENV=production \
-    RACK_ENV=production \
-    PORT=3000
-
-# Exposição da porta
+# Expõe a porta padrão do Rails
 EXPOSE 3000
 
-# Comando de inicialização
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+# Comando padrão de execução
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
